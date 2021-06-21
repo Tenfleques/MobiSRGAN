@@ -1,0 +1,12 @@
+.vscode
+env
+*img
+*images
+*results
+set14
+*user
+data
+weights
+videos
+*.DS_Store
+deprecated
