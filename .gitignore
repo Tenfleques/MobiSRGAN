@@ -10,3 +10,6 @@ weights
 videos
 *.DS_Store
 deprecated
+lrgan/preview
+*logs
+data-local

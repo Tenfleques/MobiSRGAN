@@ -11,9 +11,8 @@ import cv2
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
-IMG_ROOT = "data/FlexR/"
+IMG_ROOT = "data-local/FlexR/"
 WORK_DIR = "lrgan/"
-DIV2K_ROOT = "data/DIV2K/"
 WEIGHTS_DIR = "weights"
 TRAIN_LR_IMGS = "256x144"
 TRAIN_HR_IMGS = "1920x1080"
@@ -23,8 +22,8 @@ SIZE_Y = [256, 144]
 
 BATCH_SIZE = 32
 BUFFER_SIZE = 400
-IMG_HEIGHT = 96
-IMG_WIDTH = 96
+IMG_HEIGHT = 256
+IMG_WIDTH = 256
 
 os.makedirs(WORK_DIR, exist_ok=True)
 get_name = lambda x : ("0"*5 + str(x))[-5:]
@@ -97,7 +96,7 @@ def load_flexr_4k_eager(index, hr, lr, img_dir):
     return hr_img, lr_img
 
 def check_flexr():
-    hr, lr = load_flexr_4k_eager(randint(0,100), TRAIN_HR_IMGS, TRAIN_LR_IMGS, IMG_ROOT)
+    hr, lr = load_flexr_4k_eager(randint(3,10), TRAIN_HR_IMGS, TRAIN_LR_IMGS, IMG_ROOT)
     instance = randint(0, 1000)
 
     lr = tf.keras.preprocessing.image.img_to_array(lr)
@@ -123,12 +122,12 @@ def random_jitter(input_image, real_image):
 
   return input_image, real_image
 
-hr, lr = load_flexr_4k_eager(randint(0,100), TRAIN_HR_IMGS, TRAIN_LR_IMGS, IMG_ROOT)
+hr, lr = load_flexr_4k_eager(randint(3,10), TRAIN_HR_IMGS, TRAIN_LR_IMGS, IMG_ROOT)
 rj_inp, rj_re = random_jitter(hr, lr)
 
 def visulaize_random_data():
     instance = randint(0, 1000)
-    hr, lr = load_flexr_4k_eager(randint(0,100), TRAIN_HR_IMGS, TRAIN_LR_IMGS, IMG_ROOT)
+    hr, lr = load_flexr_4k_eager(randint(3,10), TRAIN_HR_IMGS, TRAIN_LR_IMGS, IMG_ROOT)
     rj_inp, rj_re = random_jitter(hr, lr)
 
     rj_inp = tf.keras.preprocessing.image.img_to_array(rj_inp)
@@ -276,7 +275,7 @@ generator = Generator()
 # tf.keras.utils.plot_model(generator, show_shapes=True, dpi=64)
 
 gen_output = generator(rj_inp[tf.newaxis,...], training=False)
-cv2.imwrite(os.path.join(WORK_DIR, "preview", "gen-output.png"), gen_output[0,...])
+cv2.imwrite(os.path.join(WORK_DIR, "preview", "gen-output.png"), tf.keras.preprocessing.image.img_to_array(gen_output[0,...]))
 
 LAMBDA = 100
 
@@ -322,7 +321,7 @@ discriminator = Discriminator()
 # tf.keras.utils.plot_model(discriminator, show_shapes=True, dpi=64)
 
 disc_out = discriminator([rj_inp[tf.newaxis,...], gen_output], training=False)
-cv2.imwrite(os.path.join(WORK_DIR, "preview", "gen-output.png"), disc_out[0,...,-1] * 255)
+cv2.imwrite(os.path.join(WORK_DIR, "preview", "gen-output.png"), tf.keras.preprocessing.image.img_to_array(disc_out[0,...,-1] * 255))
 
 loss_object = tf.keras.losses.BinaryCrossentropy(from_logits=True)
 
@@ -423,6 +422,6 @@ EPOCHS = 250
 checkpoint.restore(tf.train.latest_checkpoint(checkpoint_dir))
 
 
-fit(train_dataset, EPOCHS, test_dataset, start=200)
+fit(train_dataset, EPOCHS, test_dataset, start=0)
 
 generator.save(os.path.join(WEIGHTS_DIR, "lr_generator_2.h5"))
