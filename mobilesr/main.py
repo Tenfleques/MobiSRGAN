@@ -6,11 +6,12 @@ import os
 
 self_dir = os.path.dirname(os.path.abspath(__file__))
 parser = ArgumentParser()
-parser.add_argument('--image_dir', type=str, help='Path to high resolution image directory.', default=os.path.join(self_dir, "../", "data/DIV2K/DIV2K_train_HR"))
+parser.add_argument('--image_dir', type=str, help='Path to high resolution image directory.', default=os.path.join(self_dir, "../", "data-local/DIV2K_train_HR"))
 parser.add_argument('--batch_size', default=8, type=int, help='Batch size for training.')
 parser.add_argument('--epochs', default=1, type=int, help='Number of epochs for training')
 parser.add_argument('--hr_size', default=384, type=int, help='Low resolution input size.')
 parser.add_argument('--lr', default=1e-4, type=float, help='Learning rate for optimizers.')
+parser.add_argument('--lr_model_weights', default=None, type=str, help='path to HR-LR network that downscales images')
 parser.add_argument('--save_iter', default=200, type=int,
                     help='The number of iterations to save the tensorboard summaries and models.')
 
@@ -149,6 +150,7 @@ def main():
         os.makedirs('models')
 
     # load lr_generator 
+    lr_model = None
     if args.lr_model_weights:
         lr_model = tf.keras.models.load_model(args.lr_model_weights) 
         inputs = tf.keras.Input((None, None, 3))
